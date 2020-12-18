@@ -3,7 +3,7 @@
 # Run from SCCM console?
 
 # Ask for PCC Number, ideally pipe to AD to retrieve full computer name and use that as our variable
-$PCC = Read-Host "Please enter the PCC Number of the computer to be removed" | Get-ADComputer -Filter # RegEx thing...
+$PCC = Read-Host "Please enter the PCC Number of the computer to be removed" | Get-ADComputer -Filter # Ask Justin?
 
 # How to enter large amounts of PCC numbers at once? Manual type? CSV?
 
