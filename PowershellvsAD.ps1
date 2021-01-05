@@ -4,7 +4,9 @@
 Import-Module ActiveDirectory
 
 # Ask for PCC Number, ideally pipe to AD to retrieve full computer name and use that as our variable
-$PCC = Read-Host "Enter a PCC Number:" | Get-ADComputer -Filter {Name -like $PCC}
+$PCC = Read-Host "Enter a PCC Number:" | Get-ADComputer -Filter { Name -like $PCC } #Currently returns "$PCC is not defined"
+# Use Get-Wmi-Object instead?
+# BTW -match '^\d{6}$' is RegEx for PCC Number. Thanks Will!
 
 # How to enter large amounts of PCC numbers at once? Manual type? CSV? JSON array?
 
@@ -19,3 +21,4 @@ Import-Module .\ConfigurationManager.psd1
 
 # SCCM Reference: https://docs.microsoft.com/en-us/powershell/module/configurationmanager/remove-cmdevice?view=sccm-ps
 Get-CMDevice -Name $PCC | Remove-CMDevice -Confirm -WhatIf
+# I think this should work, given SCCM does not require a full PC name to search
