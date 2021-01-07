@@ -18,4 +18,4 @@ Get-ADComputer -Filter ('Name -Like "*' + $PCC + '*"')  -Server $Domain-Domain.p
 
 # SCCM Reference: https://docs.microsoft.com/en-us/powershell/module/configurationmanager/remove-cmdevice?view=sccm-ps
 Get-CMDevice -Name $PCC | Remove-CMDevice -Confirm -WhatIf
-# I think this should work, given SCCM does not require a full PC name to search
+# Should work IF site is configured, which it is currently not
