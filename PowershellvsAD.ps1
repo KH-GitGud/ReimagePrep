@@ -16,6 +16,15 @@ $PCC = Read-Host 'Enter a PCC Number'
 $Domain = Read-Host 'Enter Domain (PCC or EDU)'
 Get-ADComputer -Filter ('Name -Like "*' + $PCC + '*"')  -Server $Domain-Domain.pima.edu | Remove-ADComputer -Confirm -WhatIf
 
+# Now let's try multiples:
+#$ScanArray = Get-Content -Path 'D:\Scanned Barcodes\BARCODES.txt'
+#    foreach ( $item in $ScanArray )
+#    {
+#        Select-String -Pattern '-\d{6}$'
+#    }
+#Select-String -Path 'D:\Scanned Barcodes\BARCODES.txt' -Pattern '-\d{6}$'
+Import-CSV 'D:\Scanned Barcodes\BARCODES.txt'
+
 # SCCM Reference: https://docs.microsoft.com/en-us/powershell/module/configurationmanager/remove-cmdevice?view=sccm-ps
 Get-CMDevice -Name $PCC | Remove-CMDevice -Confirm -WhatIf
 # Should work IF site is configured, which it is currently not
