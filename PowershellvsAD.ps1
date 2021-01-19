@@ -2,29 +2,46 @@
 # Thanks to Will and Justin for proofreading format
 # BTW -match '^\d{6}$' is RegEx for PCC Number if necessary. Thanks Will!
 
-# Imports first
-# https://docs.microsoft.com/en-us/powershell/sccm/overview?view=sccm-ps
-Set-Location 'C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin'
-Import-Module .\ConfigurationManager.psd1
-    (Get-Module -Name ConfigurationManager).Version
-    (Get-Module -Name ConfigurationManager).Path
+# Credit to Kent DuBack for figuring out site config
+try {
+
+    # Site configuration
+    $SiteCode = "PCC" # Site code
+    $ProviderMachineName = "do-sccm.pcc-domain.pima.edu" # SMS Provider machine name
+    
+    # Import the ConfigurationManager.psd1 module
+    if ((Get-Module ConfigurationManager) -eq $null) {
+        Import-Module "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1"
+    }
+    
+    # Connect to the site's drive if it is not already present
+    if ((Get-PSDrive -Name $SiteCode -PSProvider CMSite -ErrorAction SilentlyContinue) -eq $null) {
+        New-PSDrive -Name $SiteCode -PSProvider CMSite -Root $ProviderMachineName
+    }
+    
+    # Set the current location to be the site code.
+    Set-Location "$($SiteCode):\"
+    
+}
+    
+catch {
+    Write-Host "SCCM is not installed on this machine or you don't have correct permissions, please install SCCM before running this script again"
+    start-sleep 5
+    exit
+}
+
+# Next section SPECIFICALLY for a Motorola Symbol CS3070 scanner
+# Retrieves a list of numbers in the rightmost column
+$DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + {:\}
+$NumbersCol = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
+$PCCRegEx = '^\d{6}$'
+
+# Ensure numbers are PCC numbers, then search AD and remove them
 Import-Module ActiveDirectory
-
-# Retrieves full name from AD using PCC number, then removes
-# AD Reference: https://docs.microsoft.com/en-us/powershell/module/addsadministration/?view=win10-ps
-$PCC = Read-Host 'Enter a PCC Number'
-$Domain = Read-Host 'Enter Domain (PCC or EDU)'
-Get-ADComputer -Filter ('Name -Like "*' + $PCC + '*"')  -Server $Domain-Domain.pima.edu | Remove-ADComputer -Confirm -WhatIf
-
-# Now let's try multiples:
-#$ScanArray = Get-Content -Path 'D:\Scanned Barcodes\BARCODES.txt'
-#    foreach ( $item in $ScanArray )
-#    {
-#        Select-String -Pattern '-\d{6}$'
-#    }
-#Select-String -Path 'D:\Scanned Barcodes\BARCODES.txt' -Pattern '-\d{6}$'
-Import-CSV 'D:\Scanned Barcodes\BARCODES.txt'
-
-# SCCM Reference: https://docs.microsoft.com/en-us/powershell/module/configurationmanager/remove-cmdevice?view=sccm-ps
-Get-CMDevice -Name $PCC | Remove-CMDevice -Confirm -WhatIf
-# Should work IF site is configured, which it is currently not
+foreach ($Barcode in $NumbersCol) {
+    if ($Barcode -match $PCCRegEx) {
+        Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server PCC-Domain.pima.edu | Remove-ADComputer -WhatIf
+        Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server EDU-Domain.pima.edu | Remove-ADComputer -WhatIf
+        Get-CMDevice -Name $Barcode | Remove-CMDevice -WhatIf
+    }
+}
