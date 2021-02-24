@@ -36,6 +36,8 @@ $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + {:\}
 $NumbersCol = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
 $PCCRegEx = '^\d{6}$'
 
+# For later: rig up a section for plain old input - this should cover scanners without storage.
+
 # Ensure numbers are PCC numbers, then search AD and remove them
 Import-Module ActiveDirectory
 foreach ($Barcode in $NumbersCol) {
