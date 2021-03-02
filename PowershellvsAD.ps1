@@ -42,6 +42,7 @@ foreach ($Barcode in $NumbersCol) {
     if ($Barcode -match $PCCRegEx) {
         Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server PCC-Domain.pima.edu | Remove-ADComputer -WhatIf
         Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server EDU-Domain.pima.edu | Remove-ADComputer -WhatIf
-        Get-CMDevice -Name $Barcode | Remove-CMDevice -WhatIf
+        Remove-CMDevice -InputObject $Barcode -WhatIf
+        #Remove-CMDevice ('Name -Like "*' + $Barcode + '*"') -WhatIf
     }
 }
