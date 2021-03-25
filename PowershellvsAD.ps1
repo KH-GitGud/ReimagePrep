@@ -48,3 +48,7 @@ foreach ($Barcode in $NumbersCol) {
         #Remove-CMDevice ('Name -Like "*' + $Barcode + '*"') -WhatIf
     }
 }
+# Correctly removes computers from AD. However, SCCM removal attempt shows (with $Barcode underlined):
+#Remove-CMDevice -InputObject $Barcode -WhatIf
+#+ CategoryInfo          : InvalidArgument: (:) [Remove-CMDevice], ParameterBindingException
+#+ FullyQualifiedErrorId : CannotConvertArgumentNoMessage,Microsoft.ConfigurationManagement.Cmdlets.Collections.Commands.RemoveDeviceCommand
