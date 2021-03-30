@@ -44,11 +44,19 @@ foreach ($Barcode in $NumbersCol) {
     if ($Barcode -match $PCCRegEx) {
         Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server PCC-Domain.pima.edu | Remove-ADComputer -WhatIf
         Get-ADComputer -Filter ('Name -Like "*' + $Barcode + '*"')  -Server EDU-Domain.pima.edu | Remove-ADComputer -WhatIf
-        Remove-CMDevice -InputObject $Barcode -WhatIf
-        #Remove-CMDevice ('Name -Like "*' + $Barcode + '*"') -WhatIf
+        #Remove-CMDevice -IResultObject $Barcode -WhatIf
     }
 }
 # Correctly removes computers from AD. However, SCCM removal attempt shows (with $Barcode underlined):
-#Remove-CMDevice -InputObject $Barcode -WhatIf
-#+ CategoryInfo          : InvalidArgument: (:) [Remove-CMDevice], ParameterBindingException
-#+ FullyQualifiedErrorId : CannotConvertArgumentNoMessage,Microsoft.ConfigurationManagement.Cmdlets.Collections.Commands.RemoveDeviceCommand
+#   Remove-CMDevice -InputObject $Barcode -WhatIf
+#   + CategoryInfo          : InvalidArgument: (:) [Remove-CMDevice], ParameterBindingException
+#   + FullyQualifiedErrorId : CannotConvertArgumentNoMessage,Microsoft.ConfigurationManagement.Cmdlets.Collections.Commands.RemoveDeviceCommand
+
+# Next attempt: -InputObject and -IResultObject show same error, does NOT like $Barcode.
+# Get-CMDevice -Name 'FullComputerName' | Remove-CMDevice
+#       ^ works.
+# Get-ADComputer -Filter ('Name -Like "*' + '132825' + '*"') | select Name
+#       ^ returns '@{Name=WC-R011132825SC}'
+# Get-CMDevice (Get-ADComputer -Filter ('Name -Like "*' + '132825' + '*"') | select Name)
+#       ^ needs JUST the name string and it can be piped to Remove-CMDevice
+#         -replace won't work as-is, this is not a string, it just returns one.
