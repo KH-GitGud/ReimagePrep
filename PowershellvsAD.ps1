@@ -44,8 +44,10 @@ foreach ($Barcode in $NumbersCol) {
     if ($Barcode -match $PCCRegEx) {
         $WildBars = 'Name -Like "*' + $Barcode + '*"'
         Get-CMDevice -Name (Get-ADComputer -Filter ($WildBars)).name
+        # (Get-CMDevice -Name *$Barcode*).name  should also work for this purpose
         # Save all names to an array ($array = @() )and then take that array to removal cmdlets INSTEAD OF using get-adcomputer multiple times
         Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
         Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
+        # Now working on ways to collapse this into one line...
     }
 }
