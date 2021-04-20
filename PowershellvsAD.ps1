@@ -32,6 +32,8 @@ catch {
 
 # Needed here: ask user if barcode data is coming from a file or direct input (scanner/keyboard)
 
+$InputType = (Read-Host -Prompt)
+
 # Next section SPECIFICALLY for a Motorola Symbol CS3070 scanner
 # Retrieves a list of numbers in the rightmost column
 $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
