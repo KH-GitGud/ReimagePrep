@@ -30,24 +30,21 @@ catch {
     exit
 }
 
+# Needed here: ask user if barcode data is coming from a file or direct input (scanner/keyboard)
+
 # Next section SPECIFICALLY for a Motorola Symbol CS3070 scanner
 # Retrieves a list of numbers in the rightmost column
-$DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + {:\}
+$DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
 $NumbersCol = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
 $PCCRegEx = '^\d{6}$'
-
-# For later: rig up a section for plain old input - this should cover scanners without storage.
 
 # Ensure numbers are PCC numbers, then search AD and remove them
 Import-Module ActiveDirectory
 foreach ($Barcode in $NumbersCol) {
     if ($Barcode -match $PCCRegEx) {
         $WildBars = 'Name -Like "*' + $Barcode + '*"'
-        Get-CMDevice -Name (Get-ADComputer -Filter ($WildBars)).name
-        # (Get-CMDevice -Name *$Barcode*).name  should also work for this purpose
-        # Save all names to an array ($array = @() )and then take that array to removal cmdlets INSTEAD OF using get-adcomputer multiple times
+        (Get-CMDevice -Name *$Barcode*).name
         Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
         Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
-        # Now working on ways to collapse this into one line...
     }
 }
