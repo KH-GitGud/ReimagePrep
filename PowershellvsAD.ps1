@@ -30,11 +30,20 @@ catch {
     exit
 }
 
-# Needed here: ask user if barcode data is coming from a file or direct input (scanner/keyboard)
+# Needed here: ask user if barcode data is coming from a csv file or direct input (scanner/keyboard)
+# Trying a Switch function
+function Get-InputType {
+    $InputType = Read-Host "How will you be entering your data?"
+    Switch ($InputType) {
+        CSV { $UserSelect = "CSV of Scanned Barcodes" }
+        Scan { $UserSelect = "Direct Scan" }
+    }
+    return $UserSelect
+}
 
-$InputType = (Read-Host -Prompt)
 
-# Next section SPECIFICALLY for a Motorola Symbol CS3070 scanner
+# ORIGINAL, FUNCTIONING CODE STARTS HERE... SPECIFICALLY for a Motorola Symbol CS3070 scanner
+# Will be reorganized shortly to run if $InputType = CSV
 # Retrieves a list of numbers in the rightmost column
 $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
 $NumbersCol = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
