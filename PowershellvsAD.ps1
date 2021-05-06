@@ -31,15 +31,13 @@ catch {
 }
 
 # Needed here: ask user if barcode data is coming from a csv file or direct input (scanner/keyboard)
-# Trying a Switch function
-function Get-InputType {
-    $InputType = Read-Host "How will you be entering your data?"
-    Switch ($InputType) {
+# Trying a Switch function. Prompts user, now where to use $UserSelect...
+$InputType = Read-Host "Are you loading from a file (CSV) or scanning PCC numbers directly (Scan)?"
+    switch ($InputType) {
         CSV { $UserSelect = "CSV of Scanned Barcodes" }
         Scan { $UserSelect = "Direct Scan" }
+        default { "Input not recognized. Please enter either 'CSV' or 'Scan' to proceed." }
     }
-    return $UserSelect
-}
 
 
 # ORIGINAL, FUNCTIONING CODE STARTS HERE... SPECIFICALLY for a Motorola Symbol CS3070 scanner
