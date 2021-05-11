@@ -35,13 +35,13 @@ catch {
 # Later: generalize the CSV input. Other things aside from this specific scanner use them.
 $InputType = Read-Host "Are you loading from a file (CSV) or scanning PCC numbers directly (Scan)?"
 switch ($InputType) {
+    # Retrieves a list of numbers in the rightmost column.
     CSV {
-        # ORIGINAL, FUNCTIONING CODE STARTS HERE... 
-        # Retrieves a list of numbers in the rightmost column
         $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
         $NumSource = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
         $PCCRegEx = '^\d{6}$'
-    } 
+    }
+    # Ideally, runs search and removal for each scanned PCC
     Scan { ($Barcode = Read-Host).$NumSource }
     default { "Input not recognized. Please enter either 'CSV' or 'Scan' to proceed." }
 }
@@ -52,7 +52,7 @@ Import-Module ActiveDirectory
 foreach ($Barcode in $NumSource) {
     if ($Barcode -match $PCCRegEx) {
         $WildBars = 'Name -Like "*' + $Barcode + '*"'
-        (Get-CMDevice -Name *$Barcode*).name
+        (Get-CMDevice -Name *$Barcode*).name # Is there a reason $Barcode is surrounded by wildcards rather than $WildBars being used?
         Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
         Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
     }
