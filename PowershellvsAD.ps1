@@ -39,23 +39,23 @@ switch ($InputType) {
         # ORIGINAL, FUNCTIONING CODE STARTS HERE... 
         # Retrieves a list of numbers in the rightmost column
         $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
-        $NumbersCol = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
+        $NumSource = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
         $PCCRegEx = '^\d{6}$'
-            
-        # Ensure numbers are PCC numbers, then search AD and remove them
-        # Does this work without the $NumberCol variable? If so, move this chunk to after the switch, the same process must happen regardless of $InputType
-        Import-Module ActiveDirectory
-        foreach ($Barcode in $NumbersCol) {
-            if ($Barcode -match $PCCRegEx) {
-                $WildBars = 'Name -Like "*' + $Barcode + '*"'
-                (Get-CMDevice -Name *$Barcode*).name
-                Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
-                Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
-            }
-        } 
-    }
-    Scan { $Barcode = Read-Host }
+    } 
+    Scan { ($Barcode = Read-Host).$NumSource }
     default { "Input not recognized. Please enter either 'CSV' or 'Scan' to proceed." }
+}
+
+# Ensure numbers are PCC numbers, then search AD and remove them
+# foreach requires an "in," renamed $NumbersCol to $NumSource to be more accurate
+Import-Module ActiveDirectory
+foreach ($Barcode in $NumSource) {
+    if ($Barcode -match $PCCRegEx) {
+        $WildBars = 'Name -Like "*' + $Barcode + '*"'
+        (Get-CMDevice -Name *$Barcode*).name
+        Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
+        Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
+    }
 }
 
 
