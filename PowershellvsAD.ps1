@@ -39,20 +39,21 @@ switch ($InputType) {
     CSV {
         $DriveLetter = (Get-Volume -Friendlyname CS3070).DriveLetter + { :\ }
         $NumSource = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
-        $PCCRegEx = '^\d{6}$'
     }
     # Ideally, runs search and removal for each scanned PCC
-    Scan { ($Barcode = Read-Host).$NumSource }
+    # Does this mean that you have to run the code every time you scan? How to fix?
+    Scan { ($Barcode = Read-Host).NumSource }
     default { "Input not recognized. Please enter either 'CSV' or 'Scan' to proceed." }
 }
 
 # Ensure numbers are PCC numbers, then search AD and remove them
 # foreach requires an "in," renamed $NumbersCol to $NumSource to be more accurate
 Import-Module ActiveDirectory
+$PCCRegEx = '^\d{6}$'
 foreach ($Barcode in $NumSource) {
     if ($Barcode -match $PCCRegEx) {
         $WildBars = 'Name -Like "*' + $Barcode + '*"'
-        (Get-CMDevice -Name *$Barcode*).name # Is there a reason $Barcode is surrounded by wildcards rather than $WildBars being used?
+        (Get-CMDevice -Name $WildBars).name
         Get-ADComputer -Filter ($WildBars) -Server PCC-Domain.pima.edu | Remove-ADComputer -Confirm
         Get-ADComputer -Filter ($WildBars) -Server EDU-Domain.pima.edu | Remove-ADComputer -Confirm
     }
