@@ -41,7 +41,9 @@ switch ($InputType) {
         $NumSource = (Import-CSV $DriveLetter'Scanned Barcodes\BARCODES.txt' -Header 'DateScanned', 'TimeScanned', 'Unknown', 'Barcode').Barcode
     }
     # Ideally, runs search and removal for each scanned PCC
-    # Does this mean that you have to run the code every time you scan? How to fix?
+    # Actually scans and displays the number, then exits the code. Wait, am I making two variables equal to each other? $Barcode and $NumSource?
+    # And is that wrapped in $InputType?
+    # Unrelated, code exits after every scan, find a better way.
     Scan { ($Barcode = Read-Host).NumSource }
     default { "Input not recognized. Please enter either 'CSV' or 'Scan' to proceed." }
 }
